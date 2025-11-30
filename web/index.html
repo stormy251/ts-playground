@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Knowledge Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        color: #e2e8f0;
+        background: #0f172a;
+      }
+
+      body {
+        margin: 0;
+        padding: 0 1.5rem 2rem;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .app {
+        max-width: 900px;
+        margin: 0 auto;
+        padding-top: 2rem;
+      }
+
+      .chat-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        min-height: 400px;
+        max-height: 600px;
+        overflow-y: auto;
+        padding: 1rem;
+      }
+
+      .message {
+        display: flex;
+        gap: 1rem;
+        animation: fadeIn 0.3s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .message.user {
+        justify-content: flex-end;
+      }
+
+      .message.assistant {
+        justify-content: flex-start;
+      }
+
+      .message-bubble {
+        max-width: 80%;
+        padding: 1rem 1.25rem;
+        border-radius: 18px;
+        line-height: 1.6;
+      }
+
+      .message.user .message-bubble {
+        background: rgba(99, 102, 241, 0.25);
+        border: 1px solid rgba(99, 102, 241, 0.4);
+      }
+
+      .message.assistant .message-bubble {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      .message-bubble ol {
+        margin: 0.75rem 0;
+        padding-left: 1.5rem;
+      }
+
+      .message-bubble li {
+        margin: 0.5rem 0;
+      }
+
+      .explanation-box {
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 8px;
+        border-left: 3px solid rgba(99, 102, 241, 0.6);
+        font-size: 0.95rem;
+      }
+
+      .panel {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 16px;
+        padding: 1.25rem;
+        box-shadow: 0 20px 45px rgba(2, 6, 23, 0.45);
+      }
+
+      img {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        margin-bottom: 1rem;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .concept-card {
+        padding: 0.75rem;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        margin-bottom: 0.75rem;
+        background: rgba(15, 23, 42, 0.6);
+      }
+
+      .concept-card strong {
+        display: block;
+        margin-bottom: 0.35rem;
+      }
+
+      .domain-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        background: rgba(99, 102, 241, 0.2);
+        border: 1px solid rgba(99, 102, 241, 0.4);
+        color: #c7d2fe;
+        font-size: 0.85rem;
+        margin: 0.25rem;
+      }
+
+      .response-text {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        margin: 1rem 0;
+      }
+
+      .domains-used {
+        margin: 1rem 0;
+        padding: 0.75rem;
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 8px;
+        border-left: 3px solid rgba(99, 102, 241, 0.6);
+      }
+
+      .domains-used h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.9rem;
+        color: #94a3b8;
+      }
+
+      form {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+
+      input[type="text"] {
+        flex: 1;
+        padding: 0.85rem 1rem;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        background: rgba(15, 23, 42, 0.7);
+        color: inherit;
+      }
+
+      button {
+        padding: 0.85rem 1.25rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(120deg, #67e8f9, #a855f7);
+        color: #0f172a;
+      }
+
+      .mode-toggle {
+        margin-top: 0.75rem;
+        background: rgba(99, 102, 241, 0.2);
+        color: #cbd5f5;
+        border: 1px solid rgba(99, 102, 241, 0.4);
+      }
+
+      .observer-panel {
+        margin-top: 1.25rem;
+        border: 1px dashed rgba(250, 204, 21, 0.4);
+        background: rgba(15, 15, 42, 0.65);
+      }
+
+      .observer-panel h3 {
+        margin-top: 0;
+      }
+
+      .observer-panel ul {
+        margin-top: 0.5rem;
+      }
+
+      .observer-message {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        background: rgba(31, 41, 55, 0.7);
+      }
+
+      .timeline {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .turn {
+        border-left: 3px solid rgba(103, 232, 249, 0.7);
+        padding-left: 1rem;
+      }
+
+      .turn h4 {
+        margin: 0 0 0.35rem;
+      }
+
+      .concept-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .concept-pill {
+        border-radius: 12px;
+        padding: 0.6rem;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(15, 23, 42, 0.5);
+        font-size: 0.9rem;
+      }
+
+      .muted {
+        color: #94a3b8;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 960px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Knowledge Interface</h1>
+      <p class="muted">
+        Ask questions and explore knowledge across different domains -
+        completely offline.
+      </p>
+    </header>
+    <main class="app">
+      <section class="panel">
+        <div class="chat-container" id="chat-container">
+          <div class="message assistant">
+            <div class="message-bubble">
+              <p>
+                👋 Hello! I'm your offline knowledge assistant. I can help
+                answer questions about science, math, history, health, and more
+                - all without needing an internet connection.
+              </p>
+              <p style="margin-top: 0.75rem">Try asking me something like:</p>
+              <ul style="margin: 0.5rem 0; padding-left: 1.5rem">
+                <li>"How do I solve 8 + 7?"</li>
+                <li>"Tell me about ancient Rome"</li>
+                <li>"What is quantum physics?"</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <form
+          id="prompt-form"
+          style="position: sticky; bottom: 0; background: #0f172a; padding-top: 1rem"
+        >
+          <input
+            type="text"
+            id="prompt-input"
+            placeholder="Ask me anything..."
+            required
+            autofocus
+          />
+          <button type="submit">Send</button>
+        </form>
+
+        <div
+          style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center"
+        >
+          <p id="status" class="muted" style="margin: 0"></p>
+          <button
+            type="button"
+            id="observer-toggle"
+            class="mode-toggle"
+            style="margin: 0"
+          >
+            Show Domains
+          </button>
+        </div>
+
+        <div
+          id="observer-panel"
+          class="observer-panel"
+          style="display: none; margin-top: 1rem"
+        >
+          <h3>Knowledge Domains Available</h3>
+          <ul
+            id="seed-summary"
+            style="list-style: none; padding: 0; margin-top: 0.75rem"
+          >
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (async () => {
+        const summaryList = document.getElementById("seed-summary");
+        const promptForm = document.getElementById("prompt-form");
+        const promptInput = document.getElementById("prompt-input");
+        const statusEl = document.getElementById("status");
+        const chatContainer = document.getElementById("chat-container");
+        const observerToggle = document.getElementById(
+          "observer-toggle",
+        );
+        const observerPanel = document.getElementById("observer-panel");
+
+        let observerMode = false;
+        let conversationHistory = [];
+
+        const addUserMessage = (prompt) => {
+          const messageEl = document.createElement("div");
+          messageEl.className = "message user";
+          messageEl.innerHTML = `
+            <div class="message-bubble">
+              ${prompt}
+            </div>
+          `;
+          chatContainer.appendChild(messageEl);
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        };
+
+        const addAssistantMessage = (response) => {
+          const messageEl = document.createElement("div");
+          messageEl.className = "message assistant";
+
+          const domains = [
+            ...new Set(response.concepts.map((c) => c.label)),
+          ];
+          const domainText = observerMode
+            ? `<div class="muted" style="margin-top: 0.75rem; font-size: 0.85rem; border-top: 1px solid rgba(148, 163, 184, 0.1); padding-top: 0.75rem;">
+            <strong>Domains:</strong> ${domains.join(", ")}
+          </div>`
+            : "";
+
+          const answerHTML = response.generatedAnswer
+            ? `
+            <p><strong>${response.generatedAnswer.answer}</strong></p>
+            ${
+              response.generatedAnswer.steps
+                ? `
+              <ol style="margin: 0.75rem 0; padding-left: 1.5rem;">
+                ${
+                  response.generatedAnswer.steps.map((step) =>
+                    `<li style="margin: 0.35rem 0;">${step}</li>`
+                  ).join("")
+                }
+              </ol>
+            `
+                : ""
+            }
+            ${
+              response.generatedAnswer.explanation
+                ? `
+              <div class="explanation-box">
+                <strong>💡 Explanation:</strong><br>
+                ${response.generatedAnswer.explanation}
+              </div>
+            `
+                : ""
+            }
+            ${domainText}
+          `
+            : `
+            <p>${response.summary}</p>
+            ${domainText}
+          `;
+
+          messageEl.innerHTML = `
+            <div class="message-bubble">
+              ${answerHTML}
+            </div>
+          `;
+          chatContainer.appendChild(messageEl);
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        };
+
+        const renderSeedData = ({ summary }) => {
+          summaryList.innerHTML = summary
+            .map(
+              (concept) => `
+            <li style="margin-bottom: 0.5rem;">
+              <strong>${concept.label}</strong> - ${concept.description}
+            </li>
+          `,
+            )
+            .join("");
+        };
+
+        const fetchSeed = async () => {
+          const res = await fetch("/api/seed");
+          renderSeedData(await res.json());
+        };
+
+        const loadConversationHistory = async () => {
+          const res = await fetch("/api/history");
+          const data = await res.json();
+          conversationHistory = data.history || [];
+
+          // Clear chat (keep welcome message)
+          while (chatContainer.children.length > 1) {
+            chatContainer.removeChild(chatContainer.lastChild);
+          }
+
+          // Render all messages
+          for (const turn of conversationHistory) {
+            addUserMessage(turn.prompt);
+            addAssistantMessage(turn.response);
+          }
+        };
+
+        promptForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const prompt = promptInput.value.trim();
+          if (!prompt) return;
+
+          // Add user message immediately
+          addUserMessage(prompt);
+          promptInput.value = "";
+          statusEl.textContent = "Thinking...";
+
+          try {
+            const res = await fetch("/api/prompt", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ prompt }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              statusEl.textContent = data.error ||
+                "Failed to process question.";
+              return;
+            }
+
+            // Add assistant response
+            addAssistantMessage(data.response);
+            conversationHistory.push({
+              prompt,
+              response: data.response,
+            });
+            statusEl.textContent = "";
+          } catch (error) {
+            console.error(error);
+            statusEl.textContent = "Network error.";
+          }
+        });
+
+        observerToggle.addEventListener("click", () => {
+          observerMode = !observerMode;
+          observerToggle.textContent = observerMode
+            ? "Hide Domains"
+            : "Show Domains";
+          observerPanel.style.display = observerMode ? "block" : "none";
+
+          // Re-render to show/hide domain info
+          if (conversationHistory.length > 0) {
+            loadConversationHistory();
+          }
+        });
+
+        await fetchSeed();
+        await loadConversationHistory();
+      })();
+    </script>
+  </body>
+</html>

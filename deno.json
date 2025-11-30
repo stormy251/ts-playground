@@ -1,7 +1,8 @@
 {
   "tasks": {
-    "start": "deno run --allow-net index.ts",
-    "dev": "deno run --watch --allow-net index.ts",
+    "start": "deno run --allow-read --allow-net server.ts",
+    "web": "deno run --watch --allow-read --allow-net server.ts",
+    "cli": "deno run --allow-read --allow-net index.ts",
     "test": "deno test",
     "lint": "deno lint",
     "fmt": "deno fmt"

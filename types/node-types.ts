@@ -1,9 +1,10 @@
 export enum NodeType {
   Base = "base",
   Circle = "circle",
+  Concept = "concept",
 }
 
-export type Node = BaseNode | CircleNode;
+export type Node = BaseNode | CircleNode | ConceptNode;
 
 export type BaseNode = {
   id: string;
@@ -17,4 +18,15 @@ export type CircleNode = BaseNode & {
   radius: number;
   color: string;
   displayText: string;
+};
+
+export type ConceptNode = BaseNode & {
+  type: NodeType.Concept;
+  vector: number[];
+  anchors: string[];
+  lastProjection?: {
+    x: number;
+    y: number;
+    confidence: number;
+  };
 };
